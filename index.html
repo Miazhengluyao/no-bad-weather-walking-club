@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Bad Weather Walking Club - MVP</title>
+    <!-- Tailwind CSS for clean UI/UX -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- Header -->
+    <header class="bg-teal-600 text-white py-6 px-4 shadow-md text-center">
+        <h1 class="text-2xl font-bold tracking-tight">☀️ No Bad Weather Walking Club 🌧️</h1>
+        <p class="text-teal-100 text-sm mt-1">Topeka Moms & Toddlers Playdate Finder (MVP Prototype)</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Controls & Filters -->
+        <div class="space-y-6 md:col-span-1">
+            
+            <!-- Feature 1: Location Hub -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <h2 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                    📍 1. Set Your Location
+                </h2>
+                <label class="block text-xs font-medium text-slate-500 mb-1">YOUR TOPEKA QUADRANT</label>
+                <select id="regionSelect" onchange="filterData()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                    <option value="SW">Southwest Topeka (Wanamaker/Urish)</option>
+                    <option value="SE">Southeast Topeka (Lake Shawnee/Croco)</option>
+                    <option value="NW">Northwest Topeka (NW Rochester)</option>
+                    <option value="NE">Northeast Topeka (Oakland Area)</option>
+                </select>
+                
+                <!-- Nearby Moms Simulation -->
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Moms Nearby (Within 5 Miles)</h3>
+                    <div id="momsList" class="space-y-2">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: Age Scorecard Filters -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <h2 class="text-lg font-semibold text-slate-900 mb-3">
+                    👶 2. Park Amenities Filter
+                </h2>
+                <p class="text-xs text-slate-500 mb-4">Select the age groups joining you today to find the perfect park match.</p>
+                
+                <div class="space-y-3">
+                    <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" id="filterNewborn" onchange="filterData()" class="mt-1 accent-teal-600 rounded">
+                        <div>
+                            <span class="block text-sm font-medium text-slate-800">Newborns & Strollers</span>
+                            <span class="block text-xs text-slate-400">Paved trails, heavy shade, benches</span>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" id="filterToddler" onchange="filterData()" class="mt-1 accent-teal-600 rounded">
+                        <div>
+                            <span class="block text-sm font-medium text-slate-800">Toddlers (1-4 Years)</span>
+                            <span class="block text-xs text-slate-400">Fenced playground, splash pads, rubber turf</span>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" id="filterPreteen" onchange="filterData()" class="mt-1 accent-teal-600 rounded">
+                        <div>
+                            <span class="block text-sm font-medium text-slate-800">Preteens (5-8 Years)</span>
+                            <span class="block text-xs text-slate-400">Climbing walls, bike tracks, open fields</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Park List -->
+        <div class="md:col-span-2 space-y-4">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="text-xl font-bold text-slate-900">Recommended Parks</h2>
+                <span id="matchCount" class="text-xs font-semibold bg-teal-100 text-teal-800 px-2.5 py-1 rounded-full">Showing all parks</span>
+            </div>
+            
+            <div id="parksContainer" class="space-y-4">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Feedback Banner for MVP testing -->
+    <div class="bg-amber-50 border-t border-amber-200 fixed bottom-0 inset-x-0 p-3 text-center text-xs text-amber-800 font-medium z-50">
+        ✨ Club Testing Phase: Screenshot any bugs or drop your feature ideas directly into our group chat!
+    </div>
+
+    <!-- Data and App Logic -->
+    <script>
+        // Real Topeka Park Data & Simulated Attributes
+        const parksData = [
+            {
+                name: "Gage Park (Reinisch Rose Garden & Playground)",
+                location: "SW",
+                address: "635 SW Gage Blvd",
+                newborn: true,
+                toddler: true,
+                preteen: true,
+                description: "The ultimate cross-age match. Beautiful paved loops for strollers, massive playgrounds for all ages, and plenty of restrooms.",
+                tags: ["Paved Trails", "Restrooms", "Shade", "Massive Play Area"]
+            },
+            {
+                name: "Family Park",
+                location: "SW",
+                address: "21st St & Urish Rd",
+                newborn: true,
+                toddler: true,
+                preteen: false,
+                description: "Excellent for walking laps with a stroller. Features great flat trails, a nice open pond area, and an accessible playground structure.",
+                tags: ["Paved Trails", "Restrooms", "Open Fields"]
+            },
+            {
+                name: "Lake Shawnee (Adventure Cove & Playgrounds)",
+                location: "SE",
+                address: "3137 SE Beach Pkwy",
+                newborn: true,
+                toddler: true,
+                preteen: true,
+                description: "Amazing lakeside stroller trails. The playgrounds offer great zones for both toddlers and older kids, plus seasonal water access.",
+                tags: ["Water Play", "Paved Trails", "Restrooms", "Pavilions"]
+            },
+            {
+                name: "Dornwood Park",
+                location: "SE",
+                address: "2500 SE Highland Ave",
+                newborn: false,
+                toddler: true,
+                preteen: true,
+                description: "Features a great seasonal spray park/splash pad perfect for toddlers and young kids to cool off, along with shaded picnic spots.",
+                tags: ["Splash Pad", "Nature Trails", "Pavilion"]
+            },
+            {
+                name: "Crestview Park",
+                location: "SW",
+                address: "4901 SW Shunga Dr",
+                newborn: true,
+                toddler: true,
+                preteen: false,
+                description: "Directly connects to the Shunga Trail for smooth stroller walking. Playground is highly visible and great for toddlers.",
+                tags: ["Shunga Trail Access", "Fenced Areas", "Benches"]
+            }
+        ];
+
+        // Simulated Database of Club Members in Topeka
+        const momsData = [
+            { name: "Sarah M.", quadrant: "SW", kids: "👶 Newborn, 👦 3yo", active: "Tue/Thu morning" },
+            { name: "Emily R.", quadrant: "SW", kids: "🧗 6yo, 👦 2yo", active: "Sat afternoon" },
+            { name: "Jessica T.", quadrant: "SE", kids: "👦 18 months", active: "Tue morning" },
+            { name: "Chloe K.", quadrant: "SE", kids: "👶 Newborn", active: "Flexible" },
+            { name: "Lin W.", quadrant: "NW", kids: "🧗 7yo, 👦 4yo", active: "Thu morning" },
+            { name: "Ashley B.", quadrant: "NE", kids: "👦 2yo", active: "Wed/Fri morning" }
+        ];
+
+        function filterData() {
+            const selectedRegion = document.getElementById('regionSelect').value;
+            const filterNewborn = document.getElementById('filterNewborn').checked;
+            const filterToddler = document.getElementById('filterToddler').checked;
+            const filterPreteen = document.getElementById('filterPreteen').checked;
+
+            // 1. Filter & Render Nearby Moms
+            const nearbyMoms = momsData.filter(mom => mom.quadrant === selectedRegion);
+            const momsContainer = document.getElementById('momsList');
+            
+            if (nearbyMoms.length === 0) {
+                momsContainer.innerHTML = `<p class="text-xs text-slate-400 italic">No moms registered in this sector yet. Be the first!</p>`;
+            } else {
+                momsContainer.innerHTML = nearbyMoms.map(mom => `
+                    <div class="p-2 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                        <div class="flex justify-between font-semibold text-slate-800">
+                            <span>👩 ${mom.name}</span>
+                            <span class="text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded">${mom.active}</span>
+                        </div>
+                        <div class="text-slate-500 mt-0.5">Kids: ${mom.kids}</div>
+                    </div>
+                `).join('');
+            }
+
+            // 2. Filter & Render Parks
+            const filteredParks = parksData.filter(park => {
+                // If a checkbox is checked, the park MUST support that demographic
+                if (filterNewborn && !park.newborn) return false;
+                if (filterToddler && !park.toddler) return false;
+                if (filterPreteen && !park.preteen) return false;
+                return true;
+            });
+
+            // Sort filtered parks so that those matching the user's quadrant appear first
+            filteredParks.sort((a, b) => {
+                if (a.location === selectedRegion && b.location !== selectedRegion) return -1;
+                if (a.location !== selectedRegion && b.location === selectedRegion) return 1;
+                return 0;
+            });
+
+            const parksContainer = document.getElementById('parksContainer');
+            document.getElementById('matchCount').innerText = `${filteredParks.length} Parks Found`;
+
+            if (filteredParks.length === 0) {
+                parksContainer.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-dashed border-slate-200">
+                        <p class="text-slate-500 text-sm">No single park hits all those checkmarks at once! Try unchecking one demographic.</p>
+                    </div>`;
+            } else {
+                parksContainer.innerHTML = filteredParks.map(park => {
+                    const isLocal = park.location === selectedRegion ? 
+                        `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">Closest to You</span>` : '';
+                    
+                    return `
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border ${park.location === selectedRegion ? 'border-amber-200 ring-2 ring-amber-100/50' : 'border-slate-100'} transition-all">
+                            <div class="flex justify-between items-start gap-2 mb-2">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base md:text-lg">${park.name}</h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">📍 ${park.address}</p>
+                                </div>
+                                ${isLocal}
+                            </div>
+                            <p class="text-sm text-slate-600 my-3 leading-relaxed">${park.description}</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${park.tags.map(tag => `<span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-lg font-medium">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Run on initial load
+        filterData();
+    </script>
+</body>
+</html>
